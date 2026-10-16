@@ -50,7 +50,7 @@
 
 ### 3.2 Drax (flow matching)
 - HF: https://huggingface.co/aiola/drax-v1 · GitHub: https://github.com/aiola-lab/drax
-- 구조: Whisper-large-v3 인코더 + DiT 디코더, 약 1.2B, 라이선스 CC-BY-4.0
+- 구조: Whisper-large-v3 인코더(**동결**, 논문) + DiT 디코더, 약 1.2B, 라이선스 모델 카드 CC-BY-4.0 / **코드 CC-BY-NC-4.0**
 - 언어: en, it, pt, de, fr, es, ja, zh (**한국어 없음**)
 - 사용 예 (모델 카드 기준):
   ```python
@@ -59,7 +59,10 @@
   result = asr.transcribe("/path/to/audio.wav", language="en", sampling_steps=32, temperature=1e-2)
   print(result[0].transcript)
   ```
-- **미확인:** 설치 방법(GitHub README 확인 필요), 학습 데이터, 중간 단계 출력을 꺼낼 수 있는지.
+- 설치: `pip install -e .` (transformers==4.52.3 고정, torch 2.7.0 권장). 배치 추론 지원. 세부는 `docs/setup_drax_whisper_llada.md`
+- 학습 데이터(논문): 8개 언어 약 15K시간. LibriSpeech, MLS, AMI, **Earnings-22**, VoxPopuli, TED-LIUM, CommonVoice-13 등 → Earnings-22 조건은 Drax에게 in-domain일 수 있음
+- 중간 단계: `asr.solver.sample(..., return_intermediates=True, time_grid=...)`로 꺼낼 수 있음(코드 기준, 실행 미확인). 소스 분포가 uniform이라 토큰이 단계마다 바뀔 수 있음. 샘플링이 항상 확률적이므로 시드 기록 필수
+- **미확인:** 메모리·속도 실측, 중간 단계 추출 코드 실제 동작.
 
 ### 3.3 Whisper-LLaDA (마스크 확산 LLM, 핵심 모델)
 - GitHub: https://github.com/liuzhan22/Diffusion-ASR (ICASSP 2026, Apache-2.0)
@@ -77,7 +80,10 @@
   - 순수 확산: `mode: "decoding"`, `block_length == gen_len` (예: 128)
   - semi-AR: `mode: "decoding"`, `block_length`를 `gen_len`의 정수 분의 1로 (예: 64, 32)
 - 참고: Whisfusion v2 논문의 측정으로는 H100에서 RTFx 7.92로 비교 모델 중 가장 느렸다.
-- **미확인:** Whisper 인코더 동결 여부, 학습 데이터(LibriSpeech로 추정), Colab에서 conda 환경 구성 방법, 실제 메모리 사용량(bf16 기준 17~20GB로 추정).
+- 확인됨 (코드·논문): Whisper 인코더 **동결**, LLaDA는 동결 + LoRA(q/k/v, rank 8), Q-Former 어댑터 학습. 학습 데이터 **LibriSpeech 960h**(속도 변형 0.9/1.1). LLaDA는 fp16, Whisper 인코더는 fp32로 로드.
+- Colab: conda 대신 pip(torch 2.7.1, transformers 4.53.2, **peft 0.3.0**). 추론에는 k2 불필요. `decode_config.yaml` 기본 모드가 `semi_ar_deliberation`이므로 `decoding`으로 바꿔야 함. `inference.py`는 리샘플·모노 변환을 안 하므로 16kHz 모노로 미리 변환. 세부는 `docs/setup_drax_whisper_llada.md`
+- ⚠ **연구 설계 영향:** `decoding` 모드는 한 번 확정한 토큰을 다시 마스킹하지 않음 → RQ2 "이후 지워지는가"는 구조상 항상 아니오. temperature 0·low_confidence 고정 → RQ3 후보 K개를 만들려면 코드 수정 필요. 출력 상한 128토큰.
+- **미확인:** 실제 메모리 사용량(가중치만 약 19GB로 추정), 클립당 시간, 체크포인트 로드 시 누락 키 여부, 체크포인트 파일 크기.
 
 ### 3.4 Whisfusion v1 (보조)
 - GitHub: https://github.com/taeyoun811/Whisfusion · HF: `taeyoun811/whisfusion` (Apache-2.0)
@@ -143,7 +149,7 @@
 2. [ ] Whisper-large-v3: LibriSpeech test-clean 소량 + UrbanSound 소량으로 구동 확인
 3. [ ] Drax: 설치 → 같은 샘플로 구동, 중간 단계 출력을 꺼낼 수 있는지 확인
 4. [ ] Whisper-LLaDA: Colab에서 환경 구성 → 체크포인트 로드 → 순수 확산과 semi-AR 각각 1~2클립 구동. 메모리와 클립당 시간 실측
-5. [ ] Whisper-LLaDA 설정 확인: 인코더 동결 여부, 학습 데이터 (README·config·논문)
+5. [x] Whisper-LLaDA 설정 확인: 인코더 동결 여부, 학습 데이터 (README·config·논문) — 2026-10-16 완료, 3.3절 참고
 6. [ ] Whisfusion v1 설치 시도 (실패해도 진행)
 7. [ ] 기준 재현: Whisper-large-v3 UrbanSound 환각률(99.97% 근처), LibriSpeech WER(2.12% 근처)
 8. [ ] 실측값(메모리, 클립당 시간, 예상 GPU 시간)으로 이 문서와 RP 갱신
