@@ -103,7 +103,7 @@ texts = [asr.processor.batch_decode(t, skip_special_tokens=True)[0] for t in tra
 |---|---|---|
 | `openai/whisper-large-v3` | HF | 약 3GB (추정) |
 | `GSAI-ML/LLaDA-8B-Instruct` | HF | 약 16GB (8B × fp16 2바이트, 추정) |
-| 학습 체크포인트 `whisper-large-v3-llada-checkpoint_best_epoch_143.pth` | [Google Drive](https://drive.google.com/file/d/1btAsCXTHQApnRcl_k5Wfn0zSD08yXHZh/view) | 미확인 |
+| 학습 체크포인트 `whisper-large-v3-llada-checkpoint_best_epoch_143.pth` | [Google Drive](https://drive.google.com/file/d/1btAsCXTHQApnRcl_k5Wfn0zSD08yXHZh/view) | 473MB (실측) |
 
 - 매번 다시 받지 않도록 HF 캐시를 Drive에 둔다: `os.environ["HF_HOME"] = "/content/drive/MyDrive/hf_cache"` (모델 import 전에 설정).
 - 체크포인트는 Drive 웹에서 "바로가기 추가"로 내 Drive에 넣거나 `gdown`으로 받는다.
@@ -161,7 +161,6 @@ decode:
 
 ## 5. 아직 문서로도 확인 못 한 항목
 
-- Whisper-LLaDA 체크포인트 파일 크기
 - Drax 모델 카드(HF)와 코드의 라이선스 차이 (CC-BY-4.0 vs CC-BY-NC-4.0)
 - Drax가 학습에 쓴 Earnings-22 분할 (test 분할 포함 여부)
 - Whisper-LLaDA 논문의 학습 GPU 사양 (논문에 없음)

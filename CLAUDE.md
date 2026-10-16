@@ -83,7 +83,7 @@
 - 확인됨 (코드·논문): Whisper 인코더 **동결**, LLaDA는 동결 + LoRA(q/k/v, rank 8), Q-Former 어댑터 학습. 학습 데이터 **LibriSpeech 960h**(속도 변형 0.9/1.1). LLaDA는 fp16, Whisper 인코더는 fp32로 로드.
 - Colab: conda 대신 pip(torch 2.7.1, transformers 4.53.2, **peft 0.3.0**). 추론에는 k2 불필요. `decode_config.yaml` 기본 모드가 `semi_ar_deliberation`이므로 `decoding`으로 바꿔야 함. `inference.py`는 리샘플·모노 변환을 안 하므로 16kHz 모노로 미리 변환. 세부는 `docs/setup_drax_whisper_llada.md`
 - ⚠ **연구 설계 영향:** `decoding` 모드는 한 번 확정한 토큰을 다시 마스킹하지 않음 → RQ2 "이후 지워지는가"는 구조상 항상 아니오. temperature 0·low_confidence 고정 → RQ3 후보 K개를 만들려면 코드 수정 필요. 출력 상한 128토큰.
-- **미확인:** 실제 메모리 사용량(가중치만 약 19GB로 추정), 클립당 시간, 체크포인트 로드 시 누락 키 여부, 체크포인트 파일 크기.
+- **미확인:** 실제 메모리 사용량(가중치만 약 19GB로 추정), 클립당 시간, 체크포인트 로드 시 누락 키 여부. 체크포인트 크기는 473MB (2026-10-16 Colab 실측).
 
 ### 3.4 Whisfusion v1 (보조)
 - GitHub: https://github.com/taeyoun811/Whisfusion · HF: `taeyoun811/whisfusion` (Apache-2.0)
