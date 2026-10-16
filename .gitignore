@@ -10,7 +10,7 @@ __pycache__/
 *.pt
 *.bin
 *.safetensors
-data/
-checkpoints/
+/data/
+/checkpoints/
 
 .DS_Store
