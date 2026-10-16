@@ -1,0 +1,16 @@
+# 파이썬 캐시
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# 대용량 파일: 오디오·가중치는 Google Drive에 두고 git에는 올리지 않는다
+*.wav
+*.flac
+*.mp3
+*.pt
+*.bin
+*.safetensors
+data/
+checkpoints/
+
+.DS_Store
